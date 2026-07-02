@@ -7,6 +7,10 @@ RUN npm install --legacy-peer-deps
 # ── Stage 2: Build ──
 FROM node:20-slim AS builder
 WORKDIR /app
+
+# Install OpenSSL so Prisma can generate the client
+RUN apt-get update -y && apt-get install -y openssl
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
@@ -21,6 +25,9 @@ FROM node:20-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+
+# Install OpenSSL so Prisma can run database queries in production
+RUN apt-get update -y && apt-get install -y openssl
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs
